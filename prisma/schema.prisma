@@ -1,0 +1,133 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Branch {
+  id        String      @id @default(cuid())
+  name      String
+  location  String?
+  users     User[]
+  inventory Inventory[]
+  orders    Order[]
+  stockLogs StockLog[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  username      String?   @unique
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          String    @default("STAFF") // ADMIN, STAFF
+  branchId      String?
+  branch        Branch?   @relation(fields: [branchId], references: [id])
+  accounts      Account[]
+  sessions      Session[]
+  orders        Order[]
+  stockLogs     StockLog[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Product {
+  id          String      @id @default(cuid())
+  name        String
+  barcode     String?     @unique
+  description String?
+  price       Float
+  costPrice   Float       @default(0)
+  unit        String?     @default("ชิ้น")
+  category    String?
+  inventory   Inventory[]
+  orderItems  OrderItem[]
+  stockLogs   StockLog[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Inventory {
+  id        String   @id @default(cuid())
+  productId String
+  branchId  String
+  quantity  Int      @default(0)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  branch    Branch   @relation(fields: [branchId], references: [id])
+
+  @@unique([productId, branchId])
+}
+
+model StockLog {
+  id             String   @id @default(cuid())
+  productId      String
+  branchId       String
+  userId         String
+  quantityChange Int
+  type           String   // IN, OUT, TRANSFER_IN, TRANSFER_OUT, SALE, ADJUSTMENT
+  prevQuantity   Int
+  newQuantity    Int
+  note           String?
+  createdAt      DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  branch  Branch  @relation(fields: [branchId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+}
+
+model Order {
+  id        String      @id @default(cuid())
+  branchId  String
+  userId    String
+  total     Float
+  status    String      // COMPLETED, REFUNDED
+  items     OrderItem[]
+  branch    Branch      @relation(fields: [branchId], references: [id])
+  user      User        @relation(fields: [userId], references: [id])
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Float   // Price at time of sale
+  order     Order   @relation(fields: [orderId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+}
