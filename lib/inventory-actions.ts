@@ -20,6 +20,8 @@ export async function getProducts(query?: string) {
       ],
     },
     include: {
+      unit: true,
+      category: true,
       inventory: {
         include: {
           branch: true,
@@ -77,22 +79,19 @@ export async function createProduct(formData: FormData) {
   const name = formData.get('name') as string
   const price = parseFloat(formData.get('price') as string)
   const costPrice = parseFloat(formData.get('costPrice') as string || '0')
-  const unit = formData.get('unit') as string || 'ชิ้น'
+  const unitId = formData.get('unitId') as string
   const barcode = formData.get('barcode') as string
-  const category = formData.get('category') as string
+  const categoryId = formData.get('categoryId') as string
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const productData: any = {
+  await prisma.product.create({
+    data: {
       name,
       price,
       costPrice,
-      unit,
+      unitId: unitId || null,
       barcode: barcode || null,
-      category: category || null,
-    }
-
-  await prisma.product.create({
-    data: productData,
+      categoryId: categoryId || null,
+    },
   })
 
   revalidatePath('/dashboard/products')
@@ -133,23 +132,20 @@ export async function updateProduct(formData: FormData) {
   const name = formData.get('name') as string
   const price = parseFloat(formData.get('price') as string)
   const costPrice = parseFloat(formData.get('costPrice') as string || '0')
-  const unit = formData.get('unit') as string || 'ชิ้น'
+  const unitId = formData.get('unitId') as string
   const barcode = formData.get('barcode') as string
-  const category = formData.get('category') as string
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updateData: any = {
-      name,
-      price,
-      costPrice,
-      unit,
-      barcode: barcode || null,
-      category: category || null,
-    }
+  const categoryId = formData.get('categoryId') as string
 
   await prisma.product.update({
     where: { id },
-    data: updateData,
+    data: {
+      name,
+      price,
+      costPrice,
+      unitId: unitId || null,
+      barcode: barcode || null,
+      categoryId: categoryId || null,
+    },
   })
 
   revalidatePath('/dashboard/products')
@@ -272,7 +268,9 @@ export async function getStockLogs(branchId?: string) {
       product: {
         select: {
           name: true,
-          unit: true
+          unit: {
+              select: { name: true }
+          }
         }
       },
       branch: {

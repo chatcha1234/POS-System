@@ -12,6 +12,13 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { updateProduct, deleteProduct } from '@/lib/inventory-actions'
 import { useState } from 'react'
 import { Pencil, Trash2 } from 'lucide-react'
@@ -22,13 +29,15 @@ interface EditProductDialogProps {
         name: string
         price: number
         costPrice: number
-        unit: string | null
+        unitId: string | null
         barcode: string | null
-        category: string | null
+        categoryId: string | null
     }
+    categories: { id: string; name: string }[]
+    units: { id: string; name: string }[]
 }
 
-export function EditProductDialog({ product }: EditProductDialogProps) {
+export function EditProductDialog({ product, categories, units }: EditProductDialogProps) {
   const [open, setOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
@@ -107,10 +116,23 @@ export function EditProductDialog({ product }: EditProductDialogProps) {
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="unit" className="text-right">
+              <Label htmlFor="unitId" className="text-right">
                 หน่วยนับ
               </Label>
-              <Input id="unit" name="unit" defaultValue={product.unit || 'ชิ้น'} className="col-span-3" />
+              <div className="col-span-3">
+                <Select name="unitId" defaultValue={product.unitId || undefined}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="เลือกหน่วยนับ" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {units.map((unit) => (
+                      <SelectItem key={unit.id} value={unit.id}>
+                        {unit.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="barcode" className="text-right">
@@ -119,10 +141,23 @@ export function EditProductDialog({ product }: EditProductDialogProps) {
               <Input id="barcode" name="barcode" defaultValue={product.barcode || ''} className="col-span-3" />
             </div>
              <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="category" className="text-right">
+              <Label htmlFor="categoryId" className="text-right">
                 หมวดหมู่
               </Label>
-              <Input id="category" name="category" defaultValue={product.category || ''} className="col-span-3" />
+              <div className="col-span-3">
+                <Select name="categoryId" defaultValue={product.categoryId || undefined}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="เลือกหมวดหมู่" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
           <DialogFooter className="flex justify-between items-center sm:justify-between">

@@ -12,10 +12,22 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { createProduct } from '@/lib/inventory-actions'
 import { useState } from 'react'
 
-export function AddProductDialog() {
+interface AddProductProps {
+  categories: { id: string; name: string }[]
+  units: { id: string; name: string }[]
+}
+
+export function AddProductDialog({ categories, units }: AddProductProps) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -70,10 +82,23 @@ export function AddProductDialog() {
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="unit" className="text-right">
+              <Label htmlFor="unitId" className="text-right">
                 หน่วยนับ
               </Label>
-              <Input id="unit" name="unit" className="col-span-3" defaultValue="ชิ้น" />
+              <div className="col-span-3">
+                <Select name="unitId" defaultValue={units[0]?.id}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="เลือกหน่วยนับ" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {units.map((unit) => (
+                      <SelectItem key={unit.id} value={unit.id}>
+                        {unit.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="barcode" className="text-right">
@@ -82,10 +107,23 @@ export function AddProductDialog() {
               <Input id="barcode" name="barcode" className="col-span-3" />
             </div>
              <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="category" className="text-right">
+              <Label htmlFor="categoryId" className="text-right">
                 หมวดหมู่
               </Label>
-              <Input id="category" name="category" className="col-span-3" />
+              <div className="col-span-3">
+                <Select name="categoryId" defaultValue={categories[0]?.id}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="เลือกหมวดหมู่" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
           <DialogFooter>

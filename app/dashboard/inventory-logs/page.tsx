@@ -27,7 +27,7 @@ interface StockLogWithRelations {
   createdAt: Date
   product: {
     name: string
-    unit: string | null
+    unit: { name: string } | null
   }
   branch: {
     name: string
@@ -98,9 +98,9 @@ export default async function InventoryLogsPage() {
                 <TableCell className="font-medium">{log.product.name}</TableCell>
                 <TableCell>{getTypeBadge(log.type)}</TableCell>
                 <TableCell className={log.quantityChange > 0 ? 'text-green-600 font-bold' : 'text-red-600 font-bold'}>
-                  {log.quantityChange > 0 ? '+' : ''}{log.quantityChange} {log.product.unit}
+                  {log.quantityChange > 0 ? '+' : ''}{log.quantityChange} {log.product.unit?.name || 'ชิ้น'}
                 </TableCell>
-                <TableCell>{log.newQuantity} {log.product.unit}</TableCell>
+                <TableCell>{log.newQuantity} {log.product.unit?.name || 'ชิ้น'}</TableCell>
                 <TableCell>{log.branch.name}</TableCell>
                 <TableCell>{log.user.name || log.user.username}</TableCell>
                 <TableCell className="text-muted-foreground text-sm">{log.note || '-'}</TableCell>

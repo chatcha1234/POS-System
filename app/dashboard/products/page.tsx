@@ -3,6 +3,7 @@ import { AddProductDialog } from '@/components/inventory/add-product-dialog'
 import { AddStockDialog } from '@/components/inventory/add-stock-dialog'
 import { EditProductDialog } from '@/components/inventory/edit-product-dialog'
 import { TransferStockDialog } from '@/components/inventory/transfer-stock-dialog'
+import { MasterDataManagement } from '@/components/inventory/master-data-management'
 import {
   Table,
   TableBody,
@@ -13,6 +14,7 @@ import {
 } from '@/components/ui/table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getProducts } from '@/lib/inventory-actions'
+import { getCategories, getUnits } from '@/lib/master-data-actions'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { AlertCircle, AlertTriangle, Package, PackageCheck } from 'lucide-react'
@@ -35,7 +37,13 @@ export default async function ProductsPage() {
       }
   })
 
-  const products = await getProducts()
+  // Fetch all data
+  const [products, categories, units] = await Promise.all([
+      getProducts(),
+      getCategories(),
+      getUnits(),
+  ])
+
   const usersBranchId = dbUser?.branchId || 'branch-001'
   const isAdmin = dbUser?.role === 'ADMIN'
   
@@ -50,9 +58,11 @@ export default async function ProductsPage() {
     name: string
     price: number
     costPrice: number
-    unit: string | null
+    unitId: string | null
+    unit: { id: string; name: string } | null
     barcode: string | null
-    category: string | null
+    categoryId: string | null
+    category: { id: string; name: string } | null
     inventory: Array<{
       branchId: string
       quantity: number
@@ -73,8 +83,11 @@ export default async function ProductsPage() {
   return (
     <div className="p-8 space-y-8">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight">คลังสินค้า</h1>
-        <AddProductDialog />
+        <div className="flex items-center gap-4">
+            <h1 className="text-3xl font-bold tracking-tight">คลังสินค้า</h1>
+            <MasterDataManagement categories={categories} units={units} />
+        </div>
+        <AddProductDialog categories={categories} units={units} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -143,11 +156,11 @@ export default async function ProductsPage() {
                         )}
                     </div>
                   </TableCell>
-                   <TableCell>{product.category || '-'}</TableCell>
+                   <TableCell>{product.category?.name || '-'}</TableCell>
                   <TableCell>{product.barcode || '-'}</TableCell>
                   {isAdmin && <TableCell className="text-muted-foreground italic">฿{(product.costPrice ?? 0).toFixed(2)}</TableCell>}
                   <TableCell>฿{(product.price ?? 0).toFixed(2)}</TableCell>
-                  <TableCell>{product.unit || 'ชิ้น'}</TableCell>
+                  <TableCell>{product.unit?.name || 'ชิ้น'}</TableCell>
                   <TableCell>
                     <span className={isLowStock ? 'text-red-600 font-bold' : ''}>
                         {stock}
@@ -161,7 +174,11 @@ export default async function ProductsPage() {
                             productName={product.name} 
                             currentBranchId={usersBranchId} 
                         />
-                        <EditProductDialog product={product} />
+                        <EditProductDialog 
+                            product={product} 
+                            categories={categories}
+                            units={units}
+                        />
                     </div>
                   </TableCell>
                 </TableRow>
@@ -169,7 +186,7 @@ export default async function ProductsPage() {
             })}
             {products.length === 0 && (
                 <TableRow>
-                    <TableCell colSpan={6} className="text-center py-4">ไม่พบข้อมูลสินค้า</TableCell>
+                    <TableCell colSpan={8} className="text-center py-4">ไม่พบข้อมูลสินค้า</TableCell>
                 </TableRow>
             )}
           </TableBody>
