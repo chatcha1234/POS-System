@@ -22,6 +22,17 @@ import {
 import { updateProduct, deleteProduct } from '@/lib/inventory-actions'
 import { useState } from 'react'
 import { Pencil, Trash2 } from 'lucide-react'
+import dynamic from 'next/dynamic'
+
+// Dynamic import with no SSR to prevent filesystem errors during build/hydration
+const ImageUpload = dynamic(() => import('@/components/ui/image-upload'), { 
+    ssr: false,
+    loading: () => (
+        <div className="w-full h-32 border-2 border-dashed border-gray-200 rounded-lg flex items-center justify-center text-gray-300">
+            Loading upload widget...
+        </div>
+    )
+})
 
 interface EditProductDialogProps {
     product: {
@@ -32,6 +43,7 @@ interface EditProductDialogProps {
         unitId: string | null
         barcode: string | null
         categoryId: string | null
+        image: string | null
     }
     categories: { id: string; name: string }[]
     units: { id: string; name: string }[]
@@ -40,6 +52,7 @@ interface EditProductDialogProps {
 export function EditProductDialog({ product, categories, units }: EditProductDialogProps) {
   const [open, setOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [imageUrl, setImageUrl] = useState(product.image || '')
 
   const handleDelete = async () => {
       if (confirm('คุณแน่ใจหรือไม่ว่าต้องการลบสินค้าชิ้นนี้?')) {
@@ -76,6 +89,9 @@ export function EditProductDialog({ product, categories, units }: EditProductDia
         </DialogHeader>
         <form
           action={async (formData) => {
+            if (imageUrl) {
+                formData.set('image', imageUrl)
+            }
             await updateProduct(formData)
             setOpen(false)
           }}
@@ -121,7 +137,7 @@ export function EditProductDialog({ product, categories, units }: EditProductDia
               </Label>
               <div className="col-span-3">
                 <Select name="unitId" defaultValue={product.unitId || undefined}>
-                  <SelectTrigger>
+                  <SelectTrigger id="unitId">
                     <SelectValue placeholder="เลือกหน่วยนับ" />
                   </SelectTrigger>
                   <SelectContent>
@@ -146,7 +162,7 @@ export function EditProductDialog({ product, categories, units }: EditProductDia
               </Label>
               <div className="col-span-3">
                 <Select name="categoryId" defaultValue={product.categoryId || undefined}>
-                  <SelectTrigger>
+                  <SelectTrigger id="categoryId">
                     <SelectValue placeholder="เลือกหมวดหมู่" />
                   </SelectTrigger>
                   <SelectContent>
@@ -157,6 +173,16 @@ export function EditProductDialog({ product, categories, units }: EditProductDia
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">รูปสินค้า</Label>
+              <div className="col-span-3">
+                <ImageUpload 
+                    value={imageUrl} 
+                    onChange={(url) => setImageUrl(url)} 
+                />
+                <input type="hidden" name="image" value={imageUrl} />
               </div>
             </div>
           </div>

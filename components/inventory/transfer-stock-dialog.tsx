@@ -14,7 +14,8 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ArrowRightLeft } from 'lucide-react'
-import { transferStock, getBranches } from '@/lib/inventory-actions'
+import { transferStock } from '@/lib/inventory-actions'
+import { getBranches } from '@/lib/branch-actions'
 import {
   Select,
   SelectContent,

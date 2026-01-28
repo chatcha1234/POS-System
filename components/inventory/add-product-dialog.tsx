@@ -21,6 +21,17 @@ import {
 } from '@/components/ui/select'
 import { createProduct } from '@/lib/inventory-actions'
 import { useState } from 'react'
+import dynamic from 'next/dynamic'
+
+// Dynamic import with no SSR to prevent filesystem errors during build/hydration
+const ImageUpload = dynamic(() => import('@/components/ui/image-upload'), { 
+    ssr: false,
+    loading: () => (
+        <div className="w-full h-32 border-2 border-dashed border-gray-200 rounded-lg flex items-center justify-center text-gray-300">
+            Loading upload widget...
+        </div>
+    )
+})
 
 interface AddProductProps {
   categories: { id: string; name: string }[]
@@ -29,6 +40,7 @@ interface AddProductProps {
 
 export function AddProductDialog({ categories, units }: AddProductProps) {
   const [open, setOpen] = useState(false)
+  const [imageUrl, setImageUrl] = useState('')
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -44,8 +56,15 @@ export function AddProductDialog({ categories, units }: AddProductProps) {
         </DialogHeader>
         <form
           action={async (formData) => {
+            // Manually append image if it's not picked up by the hidden input for some reason
+            // or ensure state is up to date. 
+            // Better yet, just use the hidden input but make sure it has a key.
+            if (imageUrl) {
+                formData.set('image', imageUrl)
+            }
             await createProduct(formData)
             setOpen(false)
+            setImageUrl('')
           }}
         >
           <div className="grid gap-4 py-4">
@@ -87,7 +106,7 @@ export function AddProductDialog({ categories, units }: AddProductProps) {
               </Label>
               <div className="col-span-3">
                 <Select name="unitId" defaultValue={units[0]?.id}>
-                  <SelectTrigger>
+                  <SelectTrigger id="unitId">
                     <SelectValue placeholder="เลือกหน่วยนับ" />
                   </SelectTrigger>
                   <SelectContent>
@@ -112,7 +131,7 @@ export function AddProductDialog({ categories, units }: AddProductProps) {
               </Label>
               <div className="col-span-3">
                 <Select name="categoryId" defaultValue={categories[0]?.id}>
-                  <SelectTrigger>
+                  <SelectTrigger id="categoryId">
                     <SelectValue placeholder="เลือกหมวดหมู่" />
                   </SelectTrigger>
                   <SelectContent>
@@ -123,6 +142,16 @@ export function AddProductDialog({ categories, units }: AddProductProps) {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">รูปสินค้า</Label>
+              <div className="col-span-3">
+                <ImageUpload 
+                    value={imageUrl} 
+                    onChange={(url) => setImageUrl(url)} 
+                />
+                <input type="hidden" name="image" value={imageUrl} />
               </div>
             </div>
           </div>

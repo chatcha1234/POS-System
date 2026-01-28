@@ -1,6 +1,7 @@
 import { auth } from '@/auth'
 import { POSClient } from '@/components/pos/pos-client'
 import { prisma } from '@/lib/prisma'
+import { getProducts } from '@/lib/inventory-actions'
 import { redirect } from 'next/navigation'
 
 export default async function POSPage() {
@@ -26,5 +27,8 @@ export default async function POSPage() {
   const branchId = dbUser?.branchId || 'branch-001'
   const userId = dbUser?.id || ''
 
-  return <POSClient userId={userId} branchId={branchId} />
+  // Optimize: Fetch products on server side for initial render
+  const initialProducts = await getProducts()
+
+  return <POSClient userId={userId} branchId={branchId} initialProducts={initialProducts} />
 }

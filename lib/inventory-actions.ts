@@ -5,11 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { auth } from '@/auth'
 import { Prisma } from '@prisma/client'
 
-export async function getBranches() {
-  return await prisma.branch.findMany({
-    orderBy: { name: 'asc' }
-  })
-}
+
 
 export async function getProducts(query?: string) {
   const products = await prisma.product.findMany({
@@ -81,6 +77,7 @@ export async function createProduct(formData: FormData) {
   const unitId = formData.get('unitId') as string
   const barcode = formData.get('barcode') as string
   const categoryId = formData.get('categoryId') as string
+  const image = formData.get('image') as string
 
   await prisma.product.create({
     data: {
@@ -90,6 +87,7 @@ export async function createProduct(formData: FormData) {
       unitId: unitId || null,
       barcode: barcode || null,
       categoryId: categoryId || null,
+      image: image || null,
     },
   })
 
@@ -134,6 +132,7 @@ export async function updateProduct(formData: FormData) {
   const unitId = formData.get('unitId') as string
   const barcode = formData.get('barcode') as string
   const categoryId = formData.get('categoryId') as string
+  const image = formData.get('image') as string
 
   await prisma.product.update({
     where: { id },
@@ -144,6 +143,7 @@ export async function updateProduct(formData: FormData) {
       unitId: unitId || null,
       barcode: barcode || null,
       categoryId: categoryId || null,
+      image: image || null,
     },
   })
 
