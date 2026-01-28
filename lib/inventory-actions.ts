@@ -69,8 +69,7 @@ async function recordStockLog(tx: Prisma.TransactionClient, productId: string, b
             note
         }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (tx as any).stockLog.create({
+    await tx.stockLog.create({
         data: logData
     })
 }
@@ -261,8 +260,7 @@ export async function transferStock(formData: FormData) {
 }
 
 export async function getStockLogs(branchId?: string) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return await (prisma as any).stockLog.findMany({
+  return await prisma.stockLog.findMany({
     where: branchId ? { branchId } : {},
     include: {
       product: {
