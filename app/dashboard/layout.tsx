@@ -40,11 +40,13 @@ export default async function DashboardLayout({
         <header className="border-b bg-white dark:bg-black p-4 flex justify-between items-center shadow-sm">
             <div className="flex items-center gap-8">
                 <Link href="/dashboard" className="flex flex-col -space-y-1 group">
-                    <span className="text-primary tracking-tighter uppercase font-black text-xl group-hover:scale-105 transition-transform origin-left">{settings.shopName.split(' ')[0]}</span>
-                    <span className="text-slate-700 font-bold text-sm tracking-tight group-hover:text-primary transition-colors">
-                        {settings.shopName.split(' ').slice(1).join(' ') || 'POS'}
+                    <span className="text-primary tracking-tighter uppercase font-black text-xl group-hover:scale-105 transition-transform origin-left">
+                        {currentBranch?.name || settings.shopName.split(' ')[0]}
                     </span>
-                    <span className="text-slate-400 text-[10px] font-bold tracking-[0.2em] uppercase pt-0.5">{currentBranch?.name || 'MAIN BRANCH'}</span>
+                    <span className="text-slate-700 font-bold text-sm tracking-tight group-hover:text-primary transition-colors">
+                        {currentBranch ? 'BRANCH' : (settings.shopName.split(' ').slice(1).join(' ') || 'POS')}
+                    </span>
+                    <span className="text-slate-400 text-[10px] font-bold tracking-[0.2em] uppercase pt-0.5">{currentBranch ? settings.shopName : 'ADMIN PANEL'}</span>
                 </Link>
                 <nav className="flex gap-1 text-sm font-semibold">
                     <Link href="/dashboard" className="px-3 py-2 rounded-xl hover:bg-slate-50 text-slate-600 hover:text-primary transition flex items-center gap-2">

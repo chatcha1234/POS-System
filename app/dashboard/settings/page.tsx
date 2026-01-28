@@ -3,7 +3,6 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Store } from 'lucide-react'
-import { getSettings } from '@/lib/settings-actions'
 import { SettingsForm } from '@/components/settings/settings-form'
 
 export default async function SettingsPage() {
@@ -26,7 +25,6 @@ export default async function SettingsPage() {
       redirect('/dashboard')
   }
 
-  const settings = await getSettings()
 
   return (
     <div className="p-8 space-y-10 bg-slate-50/50 min-h-screen">
@@ -49,7 +47,7 @@ export default async function SettingsPage() {
             </div>
           </CardHeader>
           <CardContent className="pt-8 px-8 pb-8">
-            <SettingsForm initialShopName={settings.shopName} />
+            <SettingsForm />
           </CardContent>
         </Card>
       </div>

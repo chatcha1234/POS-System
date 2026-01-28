@@ -15,6 +15,7 @@ import {
 import { MapPin, Plus, Building2 } from 'lucide-react'
 import { createBranch, getBranches } from '@/lib/branch-actions'
 import { DeleteBranchButton } from '@/components/branches/delete-branch-button'
+import { BranchEditDialog } from '@/components/branches/branch-edit-dialog'
 
 type Branch = {
     id: string;
@@ -109,7 +110,8 @@ export default async function BranchesPage() {
                   <TableCell className="py-4 text-slate-400 text-sm">
                     {new Date(branch.createdAt).toLocaleDateString('th-TH')}
                   </TableCell>
-                  <TableCell className="py-4 text-right pr-6">
+                  <TableCell className="py-4 text-right pr-6 flex justify-end gap-1">
+                    <BranchEditDialog branch={branch} />
                     <DeleteBranchButton id={branch.id} />
                   </TableCell>
                 </TableRow>
