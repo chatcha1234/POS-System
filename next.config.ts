@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Next.js 16 requires turbopack config if webpack config exists
+  // This silences the build error
+  turbopack: {},
   webpack: (config) => {
     config.resolve = {
       ...config.resolve,
